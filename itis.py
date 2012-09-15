@@ -1,16 +1,13 @@
-import os
 import sys
-try: DATA_DIR = os.path.dirname(os.path.realpath(__file__))
-except: DATA_DIR = os.getcwd()
+import caching
 import urllib
 import urllib2
 import re
 from pyquery import PyQuery as p
-import cPickle as pickle
 
 
-try: itis_cache = pickle.load(open(os.path.join(DATA_DIR, 'itis.cache'), 'r'))
-except: itis_cache = {}
+try: cache = caching.get_cache('itis')
+except: cache = {}
 
 
 def itis_lookup(name, TIMEOUT=10, CACHE=True):
@@ -23,8 +20,8 @@ def itis_lookup(name, TIMEOUT=10, CACHE=True):
     '''
 
     name = name.replace("'", '').lower()
-    if name in itis_cache and CACHE:
-        return itis_cache[name]
+    if name in cache and CACHE:
+        return cache[name]
 
     url = 'http://www.itis.gov/servlet/SingleRpt/SingleRpt'
     values = {'search_topic': 'all', 
@@ -52,13 +49,13 @@ def itis_lookup(name, TIMEOUT=10, CACHE=True):
             if len(genus) > 1: return False
             all_species.append(' '.join(this_species.split()[1:]))
         species = list(genus)[0] + ' ' + '/'.join(sorted(list(set(all_species))))
-        itis_cache[name] = species
+        cache[name] = species
     else:
-        itis_cache[name] = False
+        cache[name] = False
 
-    if CACHE: pickle.dump(itis_cache, open(os.path.join(DATA_DIR, 'itis.cache'), 'w'), protocol=-1)
+    if CACHE: caching.save_cache(cache, 'itis')
 
-    return itis_cache[name]
+    return cache[name]
 
 
 if __name__=='__main__':

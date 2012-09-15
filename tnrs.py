@@ -1,19 +1,14 @@
-import os
 import sys
-try: DATA_DIR = os.path.dirname(os.path.realpath(__file__))
-except: DATA_DIR = os.getcwd()
+import caching
 import urllib
 import urllib2
 import re
 from pyquery import PyQuery as p
-import cPickle as pickle
 
 
-try: tnrs_cache = pickle.load(open(os.path.join(DATA_DIR, 'tnrs.cache'), 'r'))
-except: tnrs_cache = {}
+try: cache = caching.get_cache('tnrs')
+except: cache = {}
 
-
-URL = "http://tnrs.iplantc.org/tnrsm-svc/matchNames?retrieve=best&names=%s"
 
 def tnrs_lookup(name, TIMEOUT=10, CACHE=True):
     '''
@@ -22,13 +17,15 @@ def tnrs_lookup(name, TIMEOUT=10, CACHE=True):
     '''
 
     name = name.replace("'", '').lower()
-    if name in tnrs_cache and CACHE:
-        return tnrs_cache[name]
+    if name in cache and CACHE:
+        return cache[name]
+        
+    url = "http://tnrs.iplantc.org/tnrsm-svc/matchNames?retrieve=best&names=%s"
 
     # lookup canonical plant names on TNRS web service
     true, false, null = True, False, None
     try:
-        response = urllib2.urlopen(URL % name.replace(' ', '%20'), timeout=TIMEOUT).read()
+        response = urllib2.urlopen(url % name.replace(' ', '%20'), timeout=TIMEOUT).read()
 
         response_dict = eval(response)
         sci_name = response_dict['items'][0]['nameScientific']
@@ -41,8 +38,8 @@ def tnrs_lookup(name, TIMEOUT=10, CACHE=True):
         result = False
 
     # cache results and return
-    tnrs_cache[name] = result
-    if CACHE: pickle.dump(tnrs_cache, open(os.path.join(DATA_DIR, 'tnrs.cache'), 'w'), protocol=-1)
+    cache[name] = result
+    if CACHE: caching.save_cache(cache, 'tnrs')
     return result
     
 
