@@ -1,9 +1,13 @@
 import os
 import cPickle as pickle
 
-try: DATA_DIR = os.path.dirname(os.path.realpath(__file__))
-except: DATA_DIR = os.getcwd()
 
+home_dir = os.path.expanduser('~')
+DATA_DIR = os.path.join(home_dir, '.tax_resolve')
+if not os.path.exists(DATA_DIR):
+    try:
+        os.mkdir(DATA_DIR)
+    except: DATA_DIR = os.getcwd()
 
 cache_path = lambda name: os.path.join(DATA_DIR, '%s.cache' % name)
 
