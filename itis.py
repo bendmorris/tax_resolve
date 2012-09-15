@@ -44,12 +44,16 @@ def itis_lookup(name, TIMEOUT=10, CACHE=True):
     if results:
         genus = set()
         all_species = []
+        result = None
         for this_species in results:
             genus.add(this_species.split()[0])
-            if len(genus) > 1: return False
+            if len(genus) > 1: 
+                result = False
+                break
             all_species.append(' '.join(this_species.split()[1:]))
-        species = list(genus)[0] + ' ' + '/'.join(sorted(list(set(all_species))))
-        cache[name] = species
+        if not result is False:
+            result = list(genus)[0] + ' ' + '/'.join(sorted(list(set(all_species))))
+        cache[name] = result
     else:
         cache[name] = False
 
