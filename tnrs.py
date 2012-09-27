@@ -23,11 +23,10 @@ def tnrs_lookup(name, TIMEOUT=10, CACHE=True):
     url = "http://tnrs.iplantc.org/tnrsm-svc/matchNames?retrieve=best&names=%s"
 
     # lookup canonical plant names on TNRS web service
-    true, false, null = True, False, None
     try:
         response = urllib2.urlopen(url % name.replace(' ', '%20'), timeout=TIMEOUT).read()
 
-        response_dict = eval(response)
+        response_dict = eval(response, {}, {'true':True, 'false':False, 'null':None})
         sci_name = response_dict['items'][0]['nameScientific']
 
         if sci_name: result = sci_name
