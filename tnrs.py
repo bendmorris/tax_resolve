@@ -3,6 +3,7 @@ import caching
 import urllib
 import urllib2
 import re
+import json
 from pyquery import PyQuery as p
 
 
@@ -26,7 +27,8 @@ def tnrs_lookup(name, TIMEOUT=10, CACHE=True):
     try:
         response = urllib2.urlopen(url % name.replace(' ', '%20'), timeout=TIMEOUT).read()
 
-        response_dict = eval(response, {}, {'true':True, 'false':False, 'null':None})
+        #response_dict = eval(response, {}, {'true':True, 'false':False, 'null':None})
+        response_dict = json.loads(response)
         sci_name = response_dict['items'][0]['nameScientific']
 
         if sci_name: result = sci_name
